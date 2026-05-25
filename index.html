@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chiến lược mua bán API/Tokens trong Community</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --bg2: #13161e;
+    --bg3: #1a1e28;
+    --border: rgba(255,255,255,0.07);
+    --border-hover: rgba(255,255,255,0.15);
+    --text: #e8eaf0;
+    --text2: #8b8fa8;
+    --text3: #5a5e72;
+    --accent-tg: #29b6f6;
+    --accent-fb: #4a90e2;
+    --accent-dc: #7c6fe0;
+    --accent-green: #4caf7d;
+    --accent-amber: #f5a623;
+    --accent-red: #e05555;
+    --font-head: 'Instrument Serif', serif;
+    --font-body: 'Be Vietnam Pro', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* Subtle grid bg */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  /* Header */
+  .header {
+    margin-bottom: 48px;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .header-eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent-amber);
+    font-weight: 500;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .header-eyebrow::before {
+    content: '';
+    width: 24px;
+    height: 1px;
+    background: var(--accent-amber);
+    display: inline-block;
+  }
+
+  .header h1 {
+    font-family: var(--font-head);
+    font-size: clamp(28px, 5vw, 42px);
+    font-weight: 400;
+    line-height: 1.15;
+    color: var(--text);
+    margin-bottom: 14px;
+  }
+  .header h1 em { color: var(--accent-amber); font-style: italic; }
+
+  .header p {
+    font-size: 14px;
+    color: var(--text2);
+    max-width: 520px;
+  }
+
+  /* Problem alert */
+  .problem {
+    background: rgba(224, 85, 85, 0.06);
+    border: 0.5px solid rgba(224, 85, 85, 0.25);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 40px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    animation: fadeUp 0.5s 0.1s ease both;
+  }
+  .problem-icon {
+    width: 32px;height:32px;border-radius:8px;
+    background: rgba(224,85,85,0.12);
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;font-size:16px;
+  }
+  .problem strong { color: #e07070; font-size: 13px; font-weight: 500; display:block;margin-bottom:3px; }
+  .problem span { font-size: 12px; color: var(--text2); }
+
+  /* Section title */
+  .section-title {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text3);
+    font-weight: 500;
+    margin-bottom: 16px;
+  }
+
+  /* Cards grid */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 32px;
+    animation: fadeUp 0.5s 0.15s ease both;
+  }
+
+  .card {
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s, transform 0.15s;
+    position: relative;
+    overflow: visible;
+  }
+  .card:hover {
+    border-color: var(--border-hover);
+    background: var(--bg3);
+    transform: translateY(-2px);
+  }
+  .card.active { border-color: var(--card-accent, #fff); background: var(--bg3); }
+  .card.active::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--card-accent, #fff), transparent 60%);
+    opacity: 0.12;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .card-badge {
+    position: absolute;
+    top: -10px; right: 14px;
+    background: var(--accent-green);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+
+  .card-icon {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    margin-bottom: 12px;
+    position: relative; z-index: 1;
+  }
+
+  .card-name {
+    font-size: 13px; font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+    position: relative; z-index: 1;
+    line-height: 1.3;
+  }
+  .card-desc {
+    font-size: 11px;
+    color: var(--text3);
+    position: relative; z-index: 1;
+    line-height: 1.5;
+  }
+
+  .risk-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 20px;
+    margin-top: 10px;
+    position: relative; z-index: 1;
+  }
+  .risk-pill .dot { width: 5px; height: 5px; border-radius: 50%; }
+  .risk-low  { background: rgba(76,175,125,0.12); color: #4caf7d; }
+  .risk-mid  { background: rgba(245,166,35,0.12); color: #f5a623; }
+  .risk-high { background: rgba(224,85,85,0.12); color: #e05555; }
+  .dot-low  { background: #4caf7d; }
+  .dot-mid  { background: #f5a623; }
+  .dot-high { background: #e05555; }
+
+  /* Detail panel */
+  .detail {
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 32px;
+    min-height: 120px;
+    animation: fadeUp 0.5s 0.2s ease both;
+    transition: border-color 0.3s;
+  }
+  .detail.has-content { border-color: var(--detail-accent, var(--border)); }
+
+  .detail-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text3);
+    font-size: 13px;
+    gap: 8px;
+    padding: 24px 0;
+  }
+
+  .detail-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 18px;
+    padding-bottom: 16px;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .detail-icon {
+    width: 42px; height: 42px; border-radius: 12px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:22px;flex-shrink:0;
+  }
+  .detail-title { font-family: var(--font-head); font-size: 20px; color: var(--text); margin-bottom: 4px; }
+  .detail-subtitle { font-size: 12px; color: var(--text2); line-height: 1.5; }
+
+  .pro-con-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .pro-con-box h4 {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .pro-con-box.pros h4 { color: var(--accent-green); }
+  .pro-con-box.cons h4 { color: var(--accent-red); }
+  .pro-con-box ul { list-style: none; }
+  .pro-con-box li {
+    font-size: 12px; color: var(--text2);
+    padding: 4px 0;
+    display: flex; gap: 6px; align-items: flex-start;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .pro-con-box li:last-child { border-bottom: none; }
+  .pro-con-box li span:first-child { flex-shrink: 0; font-size: 13px; }
+
+  .steps-title {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text3);
+    font-weight: 500;
+    margin-bottom: 12px;
+  }
+
+  .steps { display: flex; flex-direction: column; gap: 8px; }
+  .step {
+    display: flex; gap: 12px; align-items: flex-start;
+    background: var(--bg3);
+    border: 0.5px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+  }
+  .step-num {
+    width: 22px; height: 22px; border-radius: 50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size: 10px; font-weight: 700;
+    flex-shrink: 0; margin-top: 1px;
+    color: #fff;
+  }
+  .step-text { font-size: 12px; color: var(--text2); line-height: 1.55; }
+
+  /* Matrix */
+  .matrix-wrap {
+    animation: fadeUp 0.5s 0.25s ease both;
+    margin-bottom: 32px;
+  }
+
+  .matrix {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  .matrix th {
+    padding: 8px 12px;
+    text-align: left;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text3);
+    border-bottom: 0.5px solid var(--border);
+  }
+  .matrix td {
+    padding: 9px 12px;
+    border-bottom: 0.5px solid var(--border);
+    color: var(--text2);
+    vertical-align: middle;
+  }
+  .matrix tr:last-child td { border-bottom: none; }
+  .matrix tr:hover td { background: rgba(255,255,255,0.02); }
+  .matrix td:first-child { color: var(--text); font-weight: 500; }
+  .matrix th:first-child { width: 160px; }
+
+  .chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 10px; font-weight: 500; padding: 2px 8px;
+    border-radius: 20px;
+  }
+  .chip .cdot { width: 5px; height: 5px; border-radius: 50%; }
+  .chip-g { background: rgba(76,175,125,0.12); color: #4caf7d; }
+  .chip-y { background: rgba(245,166,35,0.12); color: #f5a623; }
+  .chip-r { background: rgba(224,85,85,0.12); color: #e05555; }
+  .cdot-g { background: #4caf7d; }
+  .cdot-y { background: #f5a623; }
+  .cdot-r { background: #e05555; }
+
+  .stars { color: #f5a623; letter-spacing: -1px; font-size: 13px; }
+
+  /* CTA */
+  .cta-section {
+    animation: fadeUp 0.5s 0.3s ease both;
+  }
+  .cta-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 10px;
+  }
+  .cta-btn {
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: var(--text2);
+    font-family: var(--font-body);
+    font-size: 12px;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 0.15s, background 0.15s, color 0.15s, transform 0.1s;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .cta-btn:hover {
+    border-color: var(--border-hover);
+    background: var(--bg3);
+    color: var(--text);
+    transform: translateY(-1px);
+  }
+  .cta-btn:active { transform: scale(0.98); }
+  .cta-btn-icon { font-size: 16px; flex-shrink: 0; }
+  .cta-arrow { margin-left: auto; color: var(--text3); font-size: 14px; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 520px) {
+    .pro-con-grid { grid-template-columns: 1fr; }
+    .cards { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="header-eyebrow">Phân tích chiến lược</div>
+    <h1>Tổ chức mua bán<br><em>Tokens / API</em> trong community</h1>
+    <p>4 phương án khả thi — so sánh ưu nhược điểm, hướng dẫn setup từng bước để ra quyết định nhanh.</p>
+  </div>
+
+  <div class="problem">
+    <div class="problem-icon">⚠️</div>
+    <div>
+      <strong>Vấn đề: Thuật toán Facebook dễ ban group chứa bài mua bán</strong>
+      <span>FB phát hiện qua từ khoá nhạy cảm (sell/buy/price), link rút gọn, hành vi spam bài. Group có thể bị hạn chế hoặc xoá nếu vi phạm nhiều lần.</span>
+    </div>
+  </div>
+
+  <div class="problem" style="border-color: rgba(245,166,35,0.25); background: rgba(245,166,35,0.05);">
+    <div class="problem-icon">🔍</div>
+    <div>
+      <strong style="color: #d4a030">Lưu ý chung cho mọi phương án</strong>
+      <span>Cần check kĩ các source bán API/tokens — rủi ro lừa đảo cao. Nên yêu cầu seller có lịch sử giao dịch, feedback từ member khác, hoặc dùng escrow trước khi thanh toán.</span>
+    </div>
+  </div>
+
+  <p class="section-title">Chọn phương án để xem chi tiết</p>
+
+  <div class="cards" id="cards">
+
+    <div class="card" data-id="0" style="--card-accent: var(--accent-fb)" onclick="select(0)">
+      <div class="card-icon" style="background:rgba(74,144,226,0.12)">📝</div>
+      <div class="card-name">Giữ nguyên FB group</div>
+      <div class="card-desc">Dùng ngôn ngữ mềm & format đặc biệt</div>
+      <div class="risk-pill risk-mid"><span class="dot dot-mid"></span>Rủi ro trung bình</div>
+    </div>
+
+    <div class="card" data-id="1" style="--card-accent: var(--accent-fb)" onclick="select(1)">
+      <div class="card-icon" style="background:rgba(74,144,226,0.12)">🏪</div>
+      <div class="card-name">Tách FB group Chợ</div>
+      <div class="card-desc">Group chính sạch, group phụ giao dịch</div>
+      <div class="risk-pill risk-mid"><span class="dot dot-mid"></span>Rủi ro trung bình</div>
+    </div>
+
+    <div class="card" data-id="2" style="--card-accent: var(--accent-tg)" onclick="select(2)">
+      <span class="card-badge">✦ Khuyến nghị</span>
+      <div class="card-icon" style="background:rgba(41,182,246,0.12)">✈️</div>
+      <div class="card-name">Telegram group</div>
+      <div class="card-desc">FB nội dung, Telegram giao dịch</div>
+      <div class="risk-pill risk-low"><span class="dot dot-low"></span>Rủi ro thấp</div>
+    </div>
+
+    <div class="card" data-id="3" style="--card-accent: var(--accent-dc)" onclick="select(3)">
+      <div class="card-icon" style="background:rgba(124,111,224,0.12)">🎮</div>
+      <div class="card-name">Discord server</div>
+      <div class="card-desc">Hệ thống role, verified seller</div>
+      <div class="risk-pill risk-low"><span class="dot dot-low"></span>Rủi ro rất thấp</div>
+    </div>
+
+  </div>
+
+  <div class="detail" id="detail">
+    <div class="detail-empty">
+      👆 Bấm vào một phương án để xem hướng dẫn setup
+    </div>
+  </div>
+
+  <div class="matrix-wrap">
+    <p class="section-title">So sánh tổng quan</p>
+    <table class="matrix">
+      <thead>
+        <tr>
+          <th>Tiêu chí</th>
+          <th>FB mềm</th>
+          <th>FB Chợ</th>
+          <th>Telegram</th>
+          <th>Discord</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Rủi ro bị ban</td>
+          <td><span class="chip chip-y"><span class="cdot cdot-y"></span>Trung bình</span></td>
+          <td><span class="chip chip-y"><span class="cdot cdot-y"></span>Trung bình</span></td>
+          <td><span class="chip chip-g"><span class="cdot cdot-g"></span>Rất thấp</span></td>
+          <td><span class="chip chip-g"><span class="cdot cdot-g"></span>Rất thấp</span></td>
+        </tr>
+        <tr>
+          <td>Dễ migrate user</td>
+          <td><span class="chip chip-g"><span class="cdot cdot-g"></span>Không cần</span></td>
+          <td><span class="chip chip-g"><span class="cdot cdot-g"></span>Dễ</span></td>
+          <td><span class="chip chip-y"><span class="cdot cdot-y"></span>Trung bình</span></td>
+          <td><span class="chip chip-r"><span class="cdot cdot-r"></span>Khó</span></td>
+        </tr>
+        <tr>
+          <td>Phổ biến ở VN</td>
+          <td><span class="chip chip-g"><span class="cdot cdot-g"></span>Cao nhất</span></td>
+          <td><span class="chip chip-g"><span class="cdot cdot-g"></span>Cao</span></td>
+          <td><span class="chip chip-g"><span class="cdot cdot-g"></span>Cao (AI)</span></td>
+          <td><span class="chip chip-y"><span class="cdot cdot-y"></span>Trung bình</span></td>
+        </tr>
+        <tr>
+          <td>Khả năng quản lý</td>
+          <td><span class="chip chip-r"><span class="cdot cdot-r"></span>Yếu</span></td>
+          <td><span class="chip chip-y"><span class="cdot cdot-y"></span>Trung bình</span></td>
+          <td><span class="chip chip-y"><span class="cdot cdot-y"></span>Tốt (bot)</span></td>
+          <td><span class="chip chip-g"><span class="cdot cdot-g"></span>Mạnh nhất</span></td>
+        </tr>
+        <tr>
+          <td>Effort setup</td>
+          <td><span class="chip chip-g"><span class="cdot cdot-g"></span>Rất thấp</span></td>
+          <td><span class="chip chip-g"><span class="cdot cdot-g"></span>Thấp</span></td>
+          <td><span class="chip chip-y"><span class="cdot cdot-y"></span>Trung bình</span></td>
+          <td><span class="chip chip-r"><span class="cdot cdot-r"></span>Cao</span></td>
+        </tr>
+        <tr>
+          <td>Điểm tổng</td>
+          <td><span class="stars">★★★☆☆</span></td>
+          <td><span class="stars">★★★☆☆</span></td>
+          <td><span class="stars">★★★★★</span></td>
+          <td><span class="stars">★★★★☆</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="cta-section">
+    <p class="section-title">Đọc thêm</p>
+    <div class="cta-grid">
+      <button class="cta-btn" onclick="openLink('https://telegram.org')">
+        <span class="cta-btn-icon">✈️</span>
+        <span>Tải Telegram về máy</span>
+        <span class="cta-arrow">↗</span>
+      </button>
+      <button class="cta-btn" onclick="openLink('https://discord.com')">
+        <span class="cta-btn-icon">🎮</span>
+        <span>Tạo Discord server</span>
+        <span class="cta-arrow">↗</span>
+      </button>
+      <button class="cta-btn" onclick="openLink('https://www.facebook.com/groups/create')">
+        <span class="cta-btn-icon">🏪</span>
+        <span>Tạo FB group mới</span>
+        <span class="cta-arrow">↗</span>
+      </button>
+      <button class="cta-btn" onclick="openLink('https://transparency.fb.com/policies/community-standards/')">
+        <span class="cta-btn-icon">📄</span>
+        <span>FB Community Standards</span>
+        <span class="cta-arrow">↗</span>
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const data = [
+  {
+    icon: '📝',
+    iconBg: 'rgba(74,144,226,0.12)',
+    accent: '#4a90e2',
+    title: 'Giữ nguyên FB Group — Ngôn ngữ mềm',
+    subtitle: 'Không cần tạo thêm bất cứ thứ gì. Chỉ thay đổi cách đăng bài và bổ sung quy tắc group.',
+    pros: ['Không cần migrate user', 'Giữ toàn bộ traffic FB', 'Triển khai ngay lập tức', 'Không tốn effort setup'],
+    cons: ['Mod phải làm việc 24/7', 'Rủi ro ban vẫn còn tồn tại', 'Trải nghiệm mua bán kém hơn', 'Không có bot hỗ trợ'],
+    steps: [
+      'Tạo bài ghim "Thread Chợ tháng X" — mọi giao dịch comment vào đó thay vì tạo bài riêng',
+      'Thay từ nhạy cảm: "bán/sell/price" → "chia sẻ access", "ai cần inbox", "trao đổi"',
+      'Không đăng giá công khai — ghi "giá inbox" hoặc để trong DM/Messenger',
+      'Bật duyệt bài thủ công — mod review ngôn ngữ trước khi approve',
+      'Tránh link rút gọn, không dùng hashtag thương mại (#mua #bán #giảmgiá)'
+    ]
+  },
+  {
+    icon: '🏪',
+    iconBg: 'rgba(74,144,226,0.12)',
+    accent: '#4a90e2',
+    title: 'Tách Facebook Group Chợ riêng',
+    subtitle: 'Tạo group phụ chỉ dành cho mua bán. Group chính vẫn sạch và an toàn dù group Chợ bị ảnh hưởng. <strong style="color:#f5a623">Group Chợ bị ban thì group chính vẫn còn nguyên.</strong>',
+    pros: ['Group chính luôn được bảo vệ', 'Vẫn trong hệ sinh thái FB', 'Dễ quản lý nội dung riêng biệt', 'Lọc được người xấu qua câu hỏi'],
+    cons: ['Group Chợ vẫn có rủi ro ban', 'Phân tán community', 'Cần quản lý 2 group song song', 'Khó kéo user sang group mới'],
+    steps: [
+      'Tạo group mới: "[Tên group] – Chợ / Exchange". Set Privacy = Private',
+      'Bật Membership Questions: "Bạn đã là thành viên [tên group chính]?" để lọc',
+      'Ghim bài trong group chính dẫn link vào group Chợ với mô tả rõ ràng',
+      'Đặt rule format bài: tiêu đề chuẩn, mô tả đầy đủ, không spam, mod duyệt tất cả',
+      'Nếu group Chợ bị hạn chế, group chính vẫn tiếp tục hoạt động bình thường'
+    ]
+  },
+  {
+    icon: '✈️',
+    iconBg: 'rgba(41,182,246,0.12)',
+    accent: '#29b6f6',
+    title: 'Telegram Group cho mua bán',
+    subtitle: 'FB làm "mặt tiền" tìm member mới. Telegram là nơi giao dịch thực sự — không có thuật toán cấm bài.',
+    pros: ['Không bị thuật toán ban bài', 'Bot quản lý hoàn toàn tự động', 'Phổ biến trong AI/crypto community', 'Topic riêng biệt, có tổ chức'],
+    cons: ['Phải kéo user từ FB sang', 'Bắt đầu từ 0 member', 'Ít viral hơn Facebook', 'Khó tiếp cận người mới', 'Cần dành resource tìm hiểu cách migrate và set bot quản lý trên Telegram'],
+    steps: [
+      'Tạo Telegram Channel (broadcast) cho thông báo và Telegram Group (2 chiều) cho giao dịch',
+      'Cài bot @Rose_BOT hoặc @GroupHelpBot: anti-spam, chào thành viên, từ khoá cấm',
+      'Tạo Topics riêng: #cần-mua, #cần-bán, #review-seller, #hỗ-trợ, #thông-báo',
+      'Ghim link Telegram trong FB group, đăng bài định kỳ 2-3 lần/tuần để kéo traffic',
+      'Đặt quy tắc rõ: format bài chuẩn, khuyến khích escrow, report scammer ngay'
+    ]
+  },
+  {
+    icon: '🎮',
+    iconBg: 'rgba(124,111,224,0.12)',
+    accent: '#7c6fe0',
+    title: 'Discord Server riêng',
+    subtitle: 'Nền tảng mạnh nhất để quản lý community phức tạp với hệ thống phân cấp seller/buyer.',
+    pros: ['Quản lý mạnh nhất, phân role rõ', 'Verified Seller system chống scam', 'Thread riêng cho từng deal', 'Voice chat, screen share hỗ trợ'],
+    cons: ['Ít phổ biến ở VN hơn Telegram', 'Khó kéo user nhất trong 4 phương án', 'Setup ban đầu phức tạp hơn', 'Learning curve cho user mới'],
+    steps: [
+      'Tạo Discord server, phân channel: #sell-api, #buy-api, #verified-sellers, #scam-report',
+      'Cài Carl-bot hoặc MEE6: phân role tự động New Member → Buyer → Verified Seller',
+      'Verified Seller: yêu cầu nộp thông tin, qua 1-2 tuần vetting trước khi được đăng bài',
+      'Tạo Ticket system: mỗi deal tạo thread riêng, mod có thể theo dõi và can thiệp',
+      'Link Discord vào FB Group; dùng Discord Stage cho buổi AMA hoặc announce deal lớn'
+    ]
+  }
+];
+
+let current = -1;
+
+function select(id) {
+  current = id;
+  document.querySelectorAll('.card').forEach((c, i) => {
+    c.classList.toggle('active', i === id);
+  });
+
+  const d = data[id];
+  const detail = document.getElementById('detail');
+  detail.style['--detail-accent'] = d.accent;
+  detail.classList.add('has-content');
+
+  detail.innerHTML = `
+    <div class="detail-header">
+      <div class="detail-icon" style="background:${d.iconBg};font-size:22px;">${d.icon}</div>
+      <div>
+        <div class="detail-title">${d.title}</div>
+        <div class="detail-subtitle">${d.subtitle}</div>
+      </div>
+    </div>
+    <div class="pro-con-grid">
+      <div class="pro-con-box pros">
+        <h4>Ưu điểm</h4>
+        <ul>${d.pros.map(p => `<li><span>✓</span><span>${p}</span></li>`).join('')}</ul>
+      </div>
+      <div class="pro-con-box cons">
+        <h4>Nhược điểm</h4>
+        <ul>${d.cons.map(c => `<li><span>✗</span><span>${c}</span></li>`).join('')}</ul>
+      </div>
+    </div>
+    <p class="steps-title">Hướng dẫn setup</p>
+    <div class="steps">
+      ${d.steps.map((s, i) => `
+        <div class="step">
+          <div class="step-num" style="background:${d.accent}">${i+1}</div>
+          <div class="step-text">${s}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+  detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function openLink(url) {
+  window.open(url, '_blank');
+}
+</script>
+</body>
+</html>
